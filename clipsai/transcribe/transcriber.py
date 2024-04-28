@@ -77,11 +77,8 @@ class Transcriber:
 
     def transcribe(
         self,
-        audio_file_path: str,
-        iso6391_lang_code: str or None = None,
-        batch_size: int = 16,
+        aligned_transcription: dict,
     ) -> Transcription:
-        aligned_transcription = self.get_transcribe_from_whisperx(audio_file_path, iso6391_lang_code, batch_size)
         
        # final destination for transcript information
         char_info = []
