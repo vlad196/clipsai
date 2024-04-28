@@ -81,6 +81,53 @@ class Transcriber:
         iso6391_lang_code: str or None = None,
         batch_size: int = 16,
     ) -> Transcription:
+        aligned_transcription = self.get_transcribe_from_whisperx(audio_file_path, iso6391_lang_code, batch_size)
+        
+       # final destination for transcript information
+        char_info = []
+
+        # remove global first character -> always a space
+        try:
+            del aligned_transcription["segments"][0]["chars"][0]
+        except Exception as e:
+            print("Error:", str(e))
+            print("Aligned Transcription:", aligned_transcription)
+            raise Exception(str(e))
+
+        for i, segment in enumerate(aligned_transcription["segments"]):
+            segment_chars = segment["chars"]
+
+            # iterate through each char in the segment
+            for j, char in enumerate(segment_chars):
+                char_start_time = (
+                    float(char["start"]) if "start" in char.keys() else None
+                )
+                char_end_time = float(char["end"]) if "end" in char.keys() else None
+
+                # character information
+                new_char_dic = {
+                    "char": char["char"],
+                    "start_time": char_start_time,
+                    "end_time": char_end_time,
+                    "speaker": None,
+                }
+                char_info.append(new_char_dic)
+
+        transcription_dict = {
+            "source_software": "whisperx-v3",
+            "time_created": datetime.now(),
+            "language": self.transcription["language"],
+            "num_speakers": None,
+            "char_info": char_info,
+        }
+        return Transcription(transcription_dict)
+
+    def get_transcribe_from_whisperx(
+        self,
+        audio_file_path: str,
+        iso6391_lang_code: str or None = None,
+        batch_size: int = 16,    
+    ) -> dict:
         """
         Transcribes the media file
 
@@ -107,17 +154,17 @@ class Transcriber:
             self._config_manager.assert_valid_language(iso6391_lang_code)
 
         # if iso6391_lang_code is None, whisperx will try to detect the language
-        transcription = self._model.transcribe(
+        self.transcription = self._model.transcribe(
             media_file.path, language=iso6391_lang_code, batch_size=batch_size
         )
 
         # align whisper output to get word level times
         model_a, metadata = whisperx.load_align_model(
-            language_code=transcription["language"],
+            language_code=self.transcription["language"],
             device=self._device,
         )
         aligned_transcription = whisperx.align(
-            transcription["segments"],
+            self.transcription["segments"],
             model_a,
             metadata,
             media_file.path,
@@ -182,45 +229,8 @@ class Transcriber:
             err = "Media file '{}' contains no active speech.".format(media_file.path)
             logging.error(err)
             raise NoSpeechError(err)
-
-        # final destination for transcript information
-        char_info = []
-
-        # remove global first character -> always a space
-        try:
-            del aligned_transcription["segments"][0]["chars"][0]
-        except Exception as e:
-            print("Error:", str(e))
-            print("Aligned Transcription:", aligned_transcription)
-            raise Exception(str(e))
-
-        for i, segment in enumerate(aligned_transcription["segments"]):
-            segment_chars = segment["chars"]
-
-            # iterate through each char in the segment
-            for j, char in enumerate(segment_chars):
-                char_start_time = (
-                    float(char["start"]) if "start" in char.keys() else None
-                )
-                char_end_time = float(char["end"]) if "end" in char.keys() else None
-
-                # character information
-                new_char_dic = {
-                    "char": char["char"],
-                    "start_time": char_start_time,
-                    "end_time": char_end_time,
-                    "speaker": None,
-                }
-                char_info.append(new_char_dic)
-
-        transcription_dict = {
-            "source_software": "whisperx-v3",
-            "time_created": datetime.now(),
-            "language": transcription["language"],
-            "num_speakers": None,
-            "char_info": char_info,
-        }
-        return Transcription(transcription_dict)
+        
+        return aligned_transcription
 
     def detect_language(self, media_file: AudioFile) -> str:
         """
