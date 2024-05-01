@@ -73,7 +73,7 @@ class Resizer:
             device=device,
         )
         # media pipe automatically uses gpu if available
-        self._face_mesher = mp.solutions.face_mesh.FaceMesh()
+        self._face_mesher = mp.solutions.face_mesh
         self._media_editor = MediaEditor()
 
     def resize(
@@ -915,7 +915,8 @@ class Resizer:
         mar: float
             The mouth aspect ratio.
         """
-        results = self._face_mesher.process(face)
+        face_mesh = self._face_mesher.FaceMesh()
+        results = face_mesh.process(face)
         if results.multi_face_landmarks is None:
             return None
 
