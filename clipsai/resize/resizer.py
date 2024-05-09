@@ -73,7 +73,11 @@ class Resizer:
             device=device,
         )
         # media pipe automatically uses gpu if available
-        self._face_mesher = mp.solutions.face_mesh.FaceMesh()
+        self._BaseOptions = mp.tasks.BaseOptions
+        self._FaceLandmarker = mp.tasks.vision.FaceLandmarker
+        self._FaceLandmarkerOptions = mp.tasks.vision.FaceLandmarkerOptions
+        self._VisionRunningMode = mp.tasks.vision.RunningMode
+
         self._media_editor = MediaEditor()
 
     def resize(
@@ -915,25 +919,30 @@ class Resizer:
         mar: float
             The mouth aspect ratio.
         """
-        results = self._face_mesher.process(face)
-        if results.multi_face_landmarks is None:
-            return None
 
-        landmarks = []
-        for landmark in results.multi_face_landmarks[0].landmark:
-            landmarks.append([landmark.x, landmark.y])
-        landmarks = np.array(landmarks)
-        landmarks[:, 0] *= face.shape[1]
-        landmarks[:, 1] *= face.shape[0]
+        options = _FaceLandmarkerOptions(
+        base_options=_BaseOptions(model_asset_path=model_path),
+        running_mode=_VisionRunningMode.IMAGE)
 
-        # inner lip
-        upper_lip = landmarks[[95, 88, 178, 87, 14, 317, 402, 318, 324], :]
-        lower_lip = landmarks[[191, 80, 81, 82, 13, 312, 311, 310, 415], :]
-        avg_mouth_height = np.mean(np.abs(upper_lip - lower_lip))
-        mouth_width = np.sum(np.abs(landmarks[[308], :] - landmarks[[78], :]))
-        mar = avg_mouth_height / mouth_width
+        with FaceLandmarker.create_from_options(options) as landmarker:
+            face_landmarker_result = landmarker.detect(face)
+            #results = self._FaceLandmarker.process(face)
 
-        return mar
+            landmarks = []
+            for landmark in face_landmarker_result.multi_face_landmarks[0].landmark:
+                landmarks.append([landmark.x, landmark.y])
+            landmarks = np.array(landmarks)
+            landmarks[:, 0] *= face.shape[1]
+            landmarks[:, 1] *= face.shape[0]
+
+            # inner lip
+            upper_lip = landmarks[[95, 88, 178, 87, 14, 317, 402, 318, 324], :]
+            lower_lip = landmarks[[191, 80, 81, 82, 13, 312, 311, 310, 415], :]
+            avg_mouth_height = np.mean(np.abs(upper_lip - lower_lip))
+            mouth_width = np.sum(np.abs(landmarks[[308], :] - landmarks[[78], :]))
+            mar = avg_mouth_height / mouth_width
+
+            return mar
 
     def _calc_crop(
         self,
