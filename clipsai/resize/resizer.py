@@ -129,6 +129,7 @@ class Resizer:
         Crops
             the resized speaker segments
         """
+        self.face_model = face_model
         logging.debug(
             "Video Resolution: {}x{}".format(
                 video_file.get_width_pixels(), video_file.get_height_pixels()
