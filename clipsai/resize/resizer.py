@@ -921,11 +921,10 @@ class Resizer:
             The mouth aspect ratio.
         """
 
-        options = _FaceLandmarkerOptions(
-            base_options=_BaseOptions(model_asset_path=self.face_model),
-            running_mode=_VisionRunningMode.IMAGE)
-        print(a)
-        with FaceLandmarker.create_from_options(options) as landmarker:
+        options = self._FaceLandmarkerOptions(
+            base_options=self._BaseOptions(model_asset_path=self.face_model),
+            running_mode=self._VisionRunningMode.IMAGE)
+        with self._FaceLandmarker.create_from_options(options) as landmarker:
             face_landmarker_result = landmarker.detect(face)
             #results = self._FaceLandmarker.process(face)
 
