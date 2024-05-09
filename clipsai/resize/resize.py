@@ -28,6 +28,7 @@ def resize(
     scene_merge_threshold: float = 0.25,
     time_precision: int = 6,
     device: str = None,
+    face_model: str = None,
 ) -> Crops:
     """
     Resizes a video to a specified aspect ratio, with default being 9:16. It involves
@@ -95,6 +96,7 @@ def resize(
         face_detect_width=face_detect_width,
         n_face_detect_batches=n_face_detect_batches,
         scene_merge_threshold=scene_merge_threshold,
+        face_model=face_model,
     )
     resizer.cleanup()
 

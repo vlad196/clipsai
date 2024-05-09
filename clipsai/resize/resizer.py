@@ -90,6 +90,7 @@ class Resizer:
         face_detect_width: int = 960,
         n_face_detect_batches: int = 8,
         scene_merge_threshold: float = 0.25,
+        face_model: str = None,
     ) -> Crops:
         """
         Calculates the coordinates to resize the video to for different
@@ -921,7 +922,7 @@ class Resizer:
         """
 
         options = _FaceLandmarkerOptions(
-        base_options=_BaseOptions(model_asset_path=model_path),
+        base_options=_BaseOptions(model_asset_path=self.face_model),
         running_mode=_VisionRunningMode.IMAGE)
 
         with FaceLandmarker.create_from_options(options) as landmarker:
