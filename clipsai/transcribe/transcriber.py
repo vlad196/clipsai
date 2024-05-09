@@ -415,6 +415,7 @@ class TranscriberConfigManager(ConfigManager):
             "nl",  # dutch
             "uk",  # ukrainian
             "pt",  # portuguese
+            "ru", # russian
         ]
         return valid_languages
 
