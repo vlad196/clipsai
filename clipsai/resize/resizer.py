@@ -42,6 +42,7 @@ class Resizer:
         face_detect_margin: int = 20,
         face_detect_post_process: bool = False,
         device: str = None,
+        face_model: str = None,
     ) -> None:
         """
         Initializes the Resizer with specific configurations for face

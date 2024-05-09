@@ -96,7 +96,7 @@ def resize(
         face_detect_width=face_detect_width,
         n_face_detect_batches=n_face_detect_batches,
         scene_merge_threshold=scene_merge_threshold,
-        face_model=self.face_model,
+        face_model=face_model,
     )
     resizer.cleanup()
 
