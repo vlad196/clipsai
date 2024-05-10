@@ -927,7 +927,7 @@ class Resizer:
             base_options=self._BaseOptions(model_asset_path=self.face_model),
             running_mode=self._VisionRunningMode.IMAGE)
         with self._FaceLandmarker.create_from_options(options) as landmarker:
-            face_landmarker_result = landmarker.detect(face)
+            face_landmarker_result = landmarker.detect(mp.Image(image_format=mp.ImageFormat.SRGB, data=face))
             #results = self._FaceLandmarker.process(face)
 
             landmarks = []
