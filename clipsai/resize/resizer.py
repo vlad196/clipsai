@@ -79,7 +79,7 @@ class Resizer:
         Download model for face landmark
         """
         model_url = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task'
-        model_dir = './face-landmarker-models'
+        model_dir = f'{os.environ["HOME"]}/face-landmarker-models'
         model_name = 'face_landmarker.task'
         self.model_path = (os.path.join(model_dir, model_name))
 
