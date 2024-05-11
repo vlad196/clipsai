@@ -83,7 +83,7 @@ class Resizer:
         model_name = 'face_landmarker.task'
         self.model_path = (os.path.join(model_dir, model_name))
 
-        if not os.path.lsdir(model_dir):
+        if not os.path.isdir(model_dir):
             os.makedirs(model_dir)
 
         if not os.path.isfile(model_path):
