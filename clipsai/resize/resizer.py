@@ -926,13 +926,17 @@ class Resizer:
         options = self._FaceLandmarkerOptions(
             base_options=self._BaseOptions(model_asset_path=self.face_model),
             running_mode=self._VisionRunningMode.IMAGE)
-        with self._FaceLandmarker.create_from_options(options) as landmarker:
-            face_landmarker_result = landmarker.detect(mp.Image(image_format=mp.ImageFormat.SRGB, data=face))
-            #results = self._FaceLandmarker.process(face)
+        detection_result = self._FaceLandmarker.create_from_options(options)
+        face_landmarker_result = detection_result.detect(mp.Image(image_format=mp.ImageFormat.SRGB, data=np.array(face, dtype=np.uint8)))
 
-            landmarks = []
-            for landmark in face_landmarker_result.multi_face_landmarks[0].landmark:
-                landmarks.append([landmark.x, landmark.y])
+        landmarks = []
+        face_landmarks_list = face_landmarker_result.face_landmarks
+        while len(face_landmarks_list) != 0:
+            # Loop through the detected faces to visualize.
+            for idx in range(len(face_landmarks_list)):
+                face_landmarks = face_landmarks_list[idx]
+                for landmark in face_landmarks:            
+                    landmarks.append([landmark.x, landmark.y])
             landmarks = np.array(landmarks)
             landmarks[:, 0] *= face.shape[1]
             landmarks[:, 1] *= face.shape[0]
