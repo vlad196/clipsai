@@ -86,9 +86,9 @@ class Resizer:
         if not os.path.isdir(model_dir):
             os.makedirs(model_dir)
 
-        if not os.path.isfile(model_path):
+        if not os.path.isfile(self.model_path):
             print('download face-landmarker.task...')
-            urllib.request.urlretrieve(model_url, model_path)
+            urllib.request.urlretrieve(model_url, self.model_path)
             print('complete')
         else:
             print('face_landmarker.task already exist')
