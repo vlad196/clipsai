@@ -77,7 +77,7 @@ class Resizer:
         )
 
         self.device = device
-        
+
         """
         Download model for face landmark
         """
@@ -944,7 +944,7 @@ class Resizer:
             The mouth aspect ratio.
         """
 
-        _delegate_baseoptions = mp.tasks.BaseOptions.Delegate.GPU if self.device == 'GPU' else mp.tasks.BaseOptions.Delegate.CPU
+        _delegate_baseoptions = mp.tasks.BaseOptions.Delegate.GPU if self.device == 'cuda' else mp.tasks.BaseOptions.Delegate.CPU
 
         options = self._FaceLandmarkerOptions(
             base_options=self._BaseOptions(model_asset_path=self.model_path, delegate= _delegate_baseoptions),
