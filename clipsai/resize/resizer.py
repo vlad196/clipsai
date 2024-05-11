@@ -941,8 +941,10 @@ class Resizer:
             The mouth aspect ratio.
         """
 
+        _delegate_baseoptions = mp.tasks.BaseOptions.Delegate.GPU if self.device == 'GPU' else mp.tasks.BaseOptions.Delegate.CPU
+
         options = self._FaceLandmarkerOptions(
-            base_options=self._BaseOptions(model_asset_path=self.model_path),
+            base_options=self._BaseOptions(model_asset_path=self.model_path, delegate= _delegate_baseoptions),
             running_mode=self._VisionRunningMode.IMAGE)
         detection_result = self._FaceLandmarker.create_from_options(options)
         face_landmarker_result = detection_result.detect(mp.Image(image_format=mp.ImageFormat.SRGB, data=np.array(face, dtype=np.uint8)))
