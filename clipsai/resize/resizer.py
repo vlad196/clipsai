@@ -75,6 +75,9 @@ class Resizer:
             post_process=face_detect_post_process,
             device=device,
         )
+
+        self.device = device
+        
         """
         Download model for face landmark
         """
