@@ -29,6 +29,9 @@ import mediapipe as mp
 import numpy as np
 from sklearn.cluster import KMeans
 import torch
+import os
+import hashlib
+import urllib.request
 
 
 class Resizer:
@@ -42,7 +45,6 @@ class Resizer:
         face_detect_margin: int = 20,
         face_detect_post_process: bool = False,
         device: str = None,
-        face_model: str = None,
     ) -> None:
         """
         Initializes the Resizer with specific configurations for face
@@ -73,6 +75,24 @@ class Resizer:
             post_process=face_detect_post_process,
             device=device,
         )
+        """
+        Download model for face landmark
+        """
+        model_url = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task'
+        model_dir = './face-landmarker-models'
+        model_name = 'face_landmarker.task'
+        self.model_path = (os.path.join(model_dir, model_name))
+
+        if not os.path.lsdir(model_dir):
+            os.makedirs(model_dir)
+
+        if not os.path.isfile(model_path):
+            print('download face-landmarker.task...')
+            urllib.request.urlretrieve(model_url, model_path)
+            print('complete')
+        else:
+            print('face_landmarker.task already exist')
+
         # media pipe automatically uses gpu if available
         self._BaseOptions = mp.tasks.BaseOptions
         self._FaceLandmarker = mp.tasks.vision.FaceLandmarker
@@ -91,7 +111,6 @@ class Resizer:
         face_detect_width: int = 960,
         n_face_detect_batches: int = 8,
         scene_merge_threshold: float = 0.25,
-        face_model: str = None,
     ) -> Crops:
         """
         Calculates the coordinates to resize the video to for different
@@ -129,7 +148,6 @@ class Resizer:
         Crops
             the resized speaker segments
         """
-        self.face_model = face_model
         logging.debug(
             "Video Resolution: {}x{}".format(
                 video_file.get_width_pixels(), video_file.get_height_pixels()
@@ -924,7 +942,7 @@ class Resizer:
         """
 
         options = self._FaceLandmarkerOptions(
-            base_options=self._BaseOptions(model_asset_path=self.face_model),
+            base_options=self._BaseOptions(model_asset_path=self.model_path),
             running_mode=self._VisionRunningMode.IMAGE)
         detection_result = self._FaceLandmarker.create_from_options(options)
         face_landmarker_result = detection_result.detect(mp.Image(image_format=mp.ImageFormat.SRGB, data=np.array(face, dtype=np.uint8)))
