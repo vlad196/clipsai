@@ -32,6 +32,7 @@ import torch
 import os
 import hashlib
 import urllib.request
+from mediapipe.tasks.python.components.containers import landmark as landmark_module
 
 
 class Resizer:
@@ -77,7 +78,7 @@ class Resizer:
         )
 
         self.device = device
-
+        
         """
         Download model for face landmark
         """
@@ -952,14 +953,20 @@ class Resizer:
         detection_result = self._FaceLandmarker.create_from_options(options)
         face_landmarker_result = detection_result.detect(mp.Image(image_format=mp.ImageFormat.SRGB, data=np.array(face, dtype=np.uint8)))
 
+
         landmarks = []
         face_landmarks_list = face_landmarker_result.face_landmarks
-        while len(face_landmarks_list) != 0:
-            # Loop through the detected faces to visualize.
-            for idx in range(len(face_landmarks_list)):
-                face_landmarks = face_landmarks_list[idx]
-                for landmark in face_landmarks:            
-                    landmarks.append([landmark.x, landmark.y])
+        #while len(face_landmarks_list) != 0:
+        # Loop through the detected faces to visualize.
+        if face_landmarks_list:
+        #for idx in range(len(face_landmarks_list)):
+            face_landmarks = face_landmarks_list[0]
+            #print (face_landmarks)
+            for landmark in face_landmarks:
+                #while isinstance(landmark, landmark_module.NormalizedLandmark):
+                landmarks.append([landmark.x, landmark.y])
+                #else:
+                    #landmarks.append([0.000, 0.000])
             landmarks = np.array(landmarks)
             landmarks[:, 0] *= face.shape[1]
             landmarks[:, 1] *= face.shape[0]
@@ -970,8 +977,10 @@ class Resizer:
             avg_mouth_height = np.mean(np.abs(upper_lip - lower_lip))
             mouth_width = np.sum(np.abs(landmarks[[308], :] - landmarks[[78], :]))
             mar = avg_mouth_height / mouth_width
+        else:
+            mar = None
 
-            return mar
+        return mar
 
     def _calc_crop(
         self,
